@@ -53,6 +53,21 @@ a{text-decoration: none; color: #222;}
             .input-box{
                 width: 440px;
                 position: relative;
+                p{
+                    display: none;
+                    font-size: 13px;
+                    color: #666;
+                    margin-top: 7px;
+                    &.red{
+                        color: #b3130b;
+                    }
+                    &.green{
+                        color: #0e6b0e;
+                    }
+                }
+                .gapAgree{
+                    display: block;
+                }
                 .inputText{
                     padding: 5px 10px;
                     width: 70%;
