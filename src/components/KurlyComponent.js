@@ -22,25 +22,135 @@ class KurlyComponent extends Component {
             생년월일:'',
             추가입력사항:'',
             약관동의:[],
+            //주소
             isAddressOn:false,
             isAddressInputShow:false,
+            // 아이디
+            isRegExpId:'',
+            showId:false,
+            isClassId:'',
+            //비밀번호
+            showPw:false,
+            isClassPw1:'',
+            isClassPw2:'',
+            isClassPw3:'',
+            //비밀번호 확인
+            showPwRe:false,
+            isClassPwReturn:'',
+            //이메일 확인
+            showEmail:false,
+            isClassEmail:'',
         }
+    }
+    // 아이디 포커스
+    //포커스하면 글자가 나오게 하기위해
+    onMouseDown = (e) => {
+        this.setState({showId:true});
     }
     onChangeId = (value) => {
         // 타겟되는 값으로 넣기 위해
         this.setState({아이디:value});
+        // 글자길이 6자 이상 16자 이하
+        // 영문혹은 영문과 숫자를조합
+        
+        //아이디 정규표현식
+        const regxp = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9]{6,16}$/;
+        if(value===''){
+            this.setState({isClassId:''});
+        }else{
+            if(regxp.test(value)){
+                this.setState({isClassId: true});//참일 때 초록색
+            }else{
+                this.setState({isClassId: false});//거짓일 때 빨강색
+            }
+        }
+    }
+    // 비밀번호 포커스
+    onFocusPw=(e)=>{
+        this.setState({showPw:true});
     }
     onChangePw = (value) => {
-        this.setState({비밀번호:value})
+        this.setState({비밀번호:value});
+
+        // 비밀번호 정규표현식
+        const regExp1 = /.{10,}/;
+        // 영문/숫자/특수문자(공백 제외)만 허용하며, 2개 이상 조합 +는 한개이상 무조건 와야함 *는 들어와도 되고 안들어 와도 됨
+        const regExp2 = /((?=.*[A-Za-z])+((?=.*[0-9])+|(!@#$%^&-_)+)+)[^\s][A-Za-z0-9!@#$%^&-_]{10,}/;
+        // 동일한 숫자 3개이상 안됨
+        const regExp3 = /(.)\1\1/;
+        if(value===''){
+            this.setState({isClassPw1:''});
+        }else{
+            if(regExp1.test(value)){
+                this.setState({isClassPw1: true});
+            }else{
+                this.setState({isClassPw1: false});
+            }
+        }
+        if(value===''){
+            this.setState({isClassPw2:''});
+        }else{
+            if(regExp2.test(value)){
+                this.setState({isClassPw2: true});
+            }else{
+                this.setState({isClassPw2: false});
+            }
+        }
+        if(value===''){
+            this.setState({isClassPw3:''});
+        }else{
+            if(regExp3.test(value)===false){
+                this.setState({isClassPw3: true});
+            }else{
+                this.setState({isClassPw3: false});
+            }
+        }
     }
+    // 비밀번호 포커스
+    onFocusPwRe = (e) => {
+        this.setState({showPwRe:true})
+    }
+
     onChangePwRe = (value) => {
         this.setState({비밀번호확인:value})
+        if(value===''){
+            this.setState({isClassPwReturn:''})
+        }else{
+            if(this.state.비밀번호===value){
+                this.setState({isClassPwReturn:true})
+            }else{
+                this.setState({isClassPwReturn:false})
+            }
+        }
     }
     onChangeName = (value) => {
         this.setState({이름:value})
     }
+
+    //이메일 포커스
+    onFocusEmail = (e) => {
+        this.setState({showEmail:true})
+    }
     onChangeEmail = (value) => {
         this.setState({이메일:value})
+
+        //이메일 정규표현식
+        //mirrorlight@naver.com
+        //mirrorlight@hanmail.com
+        //mir_ght@yahoo.co.kr
+        //mir.ght@yahoo.co.kr
+
+        // *는 들어와도 되고 안 들어와도 됨
+        const regExp=/^[A-Za-z0-9]+(.[A-Za-z0-9-_])*@[A-Za-z]+(.[A-Za-z])+(.[A-Za-z]{2,3})$/;
+        if(value===''){
+            this.setState({isClassEmail:''});
+        }else{
+            if(regExp.test(value)){
+                this.setState({isClassEmail:true});
+            }else{
+                this.setState({isClassEmail:false});
+            }
+        }
     }
     onChangePhone = (value) => {
         this.setState({휴대폰:value})
@@ -66,6 +176,12 @@ class KurlyComponent extends Component {
     
     onChangeAddress1 = (value) => {
         this.setState({주소1:value});
+        this.setState({isAddressInputShow:true});
+        //재검색을 눌르면 사라졌다가 다시 나타나게 하기 위해서
+        this.setState({isAddressOn:false});
+    }
+    onChangeAddress2 = (value) => {
+        this.setState({주소2:value});
     }
     onChangeCheckEvent = (checked, value) => {
         let result = '';// true인 친구를 누적해야 함
@@ -131,7 +247,8 @@ class KurlyComponent extends Component {
     onClickAddress = (e) => {
         e.preventDefault();
         // true로 만들어줌
-        this.setState({isAddressOn:true})
+        this.setState({isAddressOn:true});
+
     }
     onChangeCheckEventAll = (checked, value) => {
         // console.log([...this.state.약관동의])
@@ -155,8 +272,9 @@ class KurlyComponent extends Component {
     // 가입하기 버튼을 눌르면 php로 이동
     OnSubmitEvent = (e) => {
         e.preventDefault();
-
+        // 생년월일과 주소에 각각의 값들이 합쳐서 들어오게하려고
         this.setState({생년월일:`${this.state.생년}-${this.state.생월}-${this.state.생일}`})
+        this.setState({주소:`${this.state.주소1} ${this.state.주소2}`})
     }
     render() {
         return (
@@ -175,9 +293,16 @@ class KurlyComponent extends Component {
                                         <span>아이디<i>*</i></span>
                                     </div>
                                     <div className="input-box">
-                                        <input type="text" className="inputText" id="inputId" placeholder='아이디를 입력해주세요' onChange={(e)=>this.onChangeId(e.target.value)} value={this.state.아이디} />
+                                        <input type="text" className="inputText" id="inputId" placeholder='아이디를 입력해주세요' onChange={(e)=>this.onChangeId(e.target.value)} value={this.state.아이디} onFocus={(e)=>this.onMouseDown(e)} />
                                         <button className="w120-btn">중복확인</button>
-                                        <p className=''>6자 이상 16자 이하의 영문 혹은 영문과 숫자를 조합</p>
+                                        {
+                                            // showId값이 있으면
+                                            this.state.showId && (
+                                                <>
+                                                <p className={(this.state.isClassId===''?'':(this.state.isClassId===true?'green':'red'))}>6자 이상 16자 이하의 영문 혹은 영문과 숫자를 조합</p>
+                                                </>       
+                                            )
+                                        }
                                     </div>
                                 </div>
                             </li>
@@ -187,10 +312,23 @@ class KurlyComponent extends Component {
                                         <span>비밀번호<i>*</i></span>
                                     </div>
                                     <div className="input-box">
-                                        <input type="password" className="inputText" id="inputPw" placeholder='비밀번호를 입력해주세요' value={this.state.비밀번호} onChange={(e)=>this.onChangePw(e.target.value)}/>
-                                        <p className=''>최소 10자 이상 입력</p>
-                                        <p className=''>영문/숫자/특수문자(공백 제외)만 허용하며, 2개 이상 조합</p>
-                                        <p className=''>동일한 숫자 3개 이상 연속 사용 불가</p>
+                                        <input type="text" className="inputText" id="inputPw" placeholder='비밀번호를 입력해주세요' value={this.state.비밀번호} onChange={(e)=>this.onChangePw(e.target.value)} onFocus={(e)=>this.onFocusPw(e)}/>
+                                        {
+                                            this.state.showPw && (
+                                                <>
+                                                    <p className={(
+                                                        this.state.isClassPw1===''?'':(this.state.isClassPw1===true?'green':'red')
+                                                    )}>최소 10자 이상 입력</p>
+                                                    <p className={(
+                                                        this.state.isClassPw2===''?'':(this.state.isClassPw2===true?'green':'red')
+                                                    )}>영문/숫자/특수문자(공백 제외)만 허용하며, 2개 이상 조합</p>
+                                                    <p className={(
+                                                        this.state.isClassPw3===''?'':(this.state.isClassPw3===true?'green':'red')
+                                                    )}
+                                                    >동일한 숫자,문자 3개 이상 연속 사용 불가</p>
+                                                </>
+                                            )
+                                        }
                                     </div>
                                 </div>
                             </li>
@@ -200,9 +338,14 @@ class KurlyComponent extends Component {
                                         <span>비밀번호 확인<i>*</i></span>
                                     </div>
                                     <div className="input-box">
-                                        <input type="password" className="inputText" id="inputPw1" placeholder='비밀번호를 한번 더 입력해주세요' onChange={(e)=>this.onChangePwRe(e.target.value)} value={this.state.비밀번호확인}/>
-                                        <p className=''>비밀번호를 한번 더 입력해 주세요.</p>
-                                        <p className=''>동일한 비밀번호를 입력</p>
+                                        <input type="password" className="inputText" id="inputPw1" placeholder='비밀번호를 한번 더 입력해주세요' onChange={(e)=>this.onChangePwRe(e.target.value)} value={this.state.비밀번호확인} onFocus={(e)=>this.onFocusPwRe(e)}/>
+                                        {
+                                            this.state.showPwRe &&(
+                                            <>
+                                            <p className={(this.state.isClassPwReturn===''?'':(this.state.isClassPwReturn===true?'green':'red'))}>동일한 비밀번호를 입력</p>
+                                            </>
+                                            )
+                                        }
                                     </div>
                                 </div>
                             </li>
@@ -222,8 +365,15 @@ class KurlyComponent extends Component {
                                         <span>이메일<i>*</i></span>
                                     </div>
                                     <div className="input-box">
-                                        <input type="text" className="inputText" id="inputEmail" placeholder='예: marketkurly@kurly.com' onChange={(e)=>this.onChangeEmail(e.target.value)} value={this.state.이메일}/>
+                                        <input type="text" className="inputText" id="inputEmail" placeholder='예: marketkurly@kurly.com' onChange={(e)=>this.onChangeEmail(e.target.value)} value={this.state.이메일} onFocus={(e)=>this.onFocusEmail(e)}/>
                                         <button className="w120-btn">중복확인</button>
+                                        {
+                                            this.state.showEmail &&(
+                                                <>
+                                                    <p className={(this.state.isClassEmail===''?'':this.state.isClassEmail===true?'green':'red')}>이메일 형식으로 입력해주세요.</p>
+                                                </>
+                                            )
+                                        }
                                     </div>
                                 </div>
                             </li>
@@ -248,11 +398,19 @@ class KurlyComponent extends Component {
                                             this.state.isAddressInputShow && ( 
                                                 <>
                                                     <input type="text" className='inputText' id='inputAddress1' placeholder='주소입력' value={this.state.주소1} onChange={(e)=>this.onChangeAddress1(e.target.value)}/>
-                                                    <input style={{margin:'5px 0'}} type="text" className='inputText' id='inputAddress2' placeholder='상세주소' value={this.state.주소2}/>
+                                                    <input style={{margin:'5px 0'}} type="text" className='inputText' id='inputAddress2' placeholder='상세 주소' value={this.state.주소2} onChange={(e)=>{this.onChangeAddress2(e.target.value)}}/>
                                                 </>
                                             )
                                         } 
-                                        <button onClick={this.onClickAddress} type='button' className="inputText addr" id='inputAddr'><img src="img/ico_search.svg" alt="검색"/> 주소검색</button>
+                                        <button onClick={this.onClickAddress} type='button' className="inputText addr" id='inputAddr'>
+                                            <img src="img/ico_search.svg" alt="검색"/>
+                                            <span>
+                                                {
+                                                    this.state.isAddressInputShow===true ? '주소재검색' : '주소검색'
+                                                }
+                                            </span>
+                                            </button>
+                                            
                                         <div id="postcode">
                                             {
                                                 //값을 내려줘야함
