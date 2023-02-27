@@ -40,6 +40,16 @@ class KurlyComponent extends Component {
             //이메일 확인
             showEmail:false,
             isClassEmail:'',
+            //중복확인
+            isModalOpen : false, //모달창 show & hide
+            modalText: '', //아이디, 이메일, 인증번호 받기
+            //비활성화 버튼
+            isPhoneClass: false,
+
+            //생년월일
+            showBirthDay:false,
+            isClassBirthDay:'',
+            birthDayGideText:'',
         }
     }
     // 아이디 포커스
@@ -65,6 +75,37 @@ class KurlyComponent extends Component {
             }
         }
     }
+    //아이디 중복확인
+    onClickMadalEvent= (e) => {
+        e.preventDefault();
+        this.setState({isModalOpen:true});
+        if(this.state.아이디===''){
+            this.setState({modalText:'6자 이상 16자 이하의 영문 혹은 영문과 숫자를 조합'})
+        }else if(this.state.isClassId===false){
+            this.setState({modalText:'6자 이상 16자 이하의 영문 혹은 영문과 숫자를 조합'})
+        }else{
+            this.setState({modalText:'사용가능한 아이디입니다.'})
+        }
+    }
+    //이메일 중복확인
+    onClickEmialModalEvent = (e) =>{
+        e.preventDefault();
+        this.setState({isModalOpen:true});
+        if(this.state.이메일===''){
+            this.setState({modalText:'이메일을 입력해주세요.'})
+        }else if(this.state.isClassEmail===false){
+            this.setState({modalText:'이메일을 형식을 입력해 주세요.'})
+        }else{
+            this.setState({modalText:'사용 가능한 이메일 입니다.'})
+        }
+    }
+
+    //닫힘버튼
+    onClickModalClose = (e) => {
+        e.preventDefault();
+        this.setState({isModalOpen:false});
+    }
+    
     // 비밀번호 포커스
     onFocusPw=(e)=>{
         this.setState({showPw:true});
@@ -152,8 +193,32 @@ class KurlyComponent extends Component {
             }
         }
     }
+    //비밀번호 중복확인
+    onClickPhoneEvent = (e) =>{
+        e.preventDefault();
+        //010 4494 9814
+        //010 223 9814
+
+        if(!/^010[0-9]{3,4}[0-9]{4}$/g.test(this.state.휴대폰)){
+            this.setState({
+                isModalOpen:true,
+                modalText:'잘못된 휴대폰 번호 입니다. 확인 후 다시 시도해 주세요.'
+            })
+        }else{
+            this.setState({
+                isModalOpen:true,
+                modalText:'인증번호를 발송했습니다.'
+            })
+        }
+    }
     onChangePhone = (value) => {
-        this.setState({휴대폰:value})
+        // [^] 부정하고 ''값을 넣어줘야 숫자 이외의 값들이 작성안됨
+        this.setState({휴대폰:value.replace(/[^0-9]/g,'')});
+        if(this.state.휴대폰.length>=10 && this.state.휴대폰.length<11){
+            this.setState({isPhoneClass:true})
+        }else{
+            this.setState({isPhoneClass:false})
+        }
     }
     onChangeAddr = (value) => {
         this.setState({주소:value})
@@ -161,14 +226,104 @@ class KurlyComponent extends Component {
     onChangeZender = (value) => {
         this.setState({성별:value})
     }
+
+    //생년월일 체크 함수
+    //1.생년
+    //1900-2999
+    //const regExp=/?:1[0-9][0-9][0-9]|2[0-9][0-9][0-9]/g
+    //const regExp=/?:1\d\d\d|2\d\d\d/g
+
+    //년, 월, 일 모두 입력제한 조건을 만족할 때
+    //미래의 생년월일 가입 불가
+    //만 14세 미만 가입 불가
+    //만 100세 초과 가입 불가
+    //생년월일 저장
+    birthDayCheckEventFn = (z) => {
+        const {생년, 생월, 생일} = this.state;
+        const lastDate = new Date(생년, 생월, 0).getDate();
+        const nowYear = new Date().getFullYear();
+        const nowMonth = new Date().getMonth()+1;
+        const nowDate = new Date().getDate();
+        const nowToday = new Date(nowYear,nowMonth,nowDate);
+        const nowToday14 = new Date(nowYear-14, nowMonth, nowDate);
+        const nowToday100 = new Date(nowYear-100, nowMonth, nowDate);
+        const birthDay=new Date(생년, 생월, 생일);
+
+        if(생년==='' && 생월===''&& 생일===''){
+            return;
+        }else{
+            //생년 체크
+            if(/^(?:1\d\d\d|2\d\d\d)$/g.test(생년)===false){
+                // 4자리를 입력하지 않았을 때
+                this.setState({
+                    showBirthDay:true,
+                    isClassBirthDay: false,//빨간색
+                    birthDayGideText:'태어난 년도 4자리를 정확하게 입력해 주세요.'
+                })
+            }else if(/^(?:3\d\d\d)$/g.test(생년)===true){
+                this.setState({
+                    showBirthDay:true,
+                    isClassBirthDay: false,//빨간색
+                    birthDayGideText:'생년월일이 미래로 입력 되었습니다.'
+                })
+            }
+            else{
+                this.setState({
+                    showBirthDay:false,
+                    isClassBirthDay: '',
+                    birthDayGideText:''
+                })
+                if(/^(?:0?[1-9]|1[012])$/g.test(생월)===false){
+                    this.setState({
+                        showBirthDay:true,
+                        isClassBirthDay: false,//빨간색
+                        birthDayGideText:'태어난 월을 정확하게 입력해주세요.'
+                    })
+                }else{
+                    this.setState({
+                        showBirthDay:false,
+                        isClassBirthDay: '',//빨간색
+                        birthDayGideText:''
+                    })
+                    if(/^(?:0?[1-9]|1[0-9]|2[0-9]|3[0-1])$/g.test(생일)===false || 생일 > lastDate){
+                        this.setState({
+                            showBirthDay:true,
+                            isClassBirthDay:false,
+                            birthDayGideText:'태어난 일을 정확하게 입력해주세요.'
+                        })
+                    }else{
+                        this.setState({
+                            showBirthDay:false,
+                            isClassBirthDay: '',//빨간색
+                            birthDayGideText:''
+                        })
+                    }
+                }
+            }
+        }
+    }
+    onFocusEvent=(z)=>{
+        this.birthDayCheckEventFn();
+    }
+    onBlurEvent=(z)=>{
+        this.birthDayCheckEventFn();
+    }
     onChangeYear = (value) => {
         this.setState({생년:value})
+        const regExp=/(?:1\d\d\d|2\d\d\d)/g;
+        console.log(regExp.test(value))
     }
     onChangeMonth = (value) => {
         this.setState({생월:value})
+        //1월부터 12월
+        const regExp=/^(?:0?[1-9]|1[012])$/g;
+        console.log(regExp.test(value))
     }
     onChangeDate = (value) => {
         this.setState({생일:value})
+        //01-31 01 10 20 30
+        const regExp = /^(?:0?[1-9]|1[0-9]}2[0-9]|3[0-1])$/g;
+        console.log(regExp.test(value))
     }
     onChangeChoocheon = (value) => {
         this.setState({추가입력사항:value})
@@ -294,7 +449,7 @@ class KurlyComponent extends Component {
                                     </div>
                                     <div className="input-box">
                                         <input type="text" className="inputText" id="inputId" placeholder='아이디를 입력해주세요' onChange={(e)=>this.onChangeId(e.target.value)} value={this.state.아이디} onFocus={(e)=>this.onMouseDown(e)} />
-                                        <button className="w120-btn">중복확인</button>
+                                        <button className="w120-btn" onClick={this.onClickMadalEvent}>중복확인</button>
                                         {
                                             // showId값이 있으면
                                             this.state.showId && (
@@ -312,7 +467,7 @@ class KurlyComponent extends Component {
                                         <span>비밀번호<i>*</i></span>
                                     </div>
                                     <div className="input-box">
-                                        <input type="text" className="inputText" id="inputPw" placeholder='비밀번호를 입력해주세요' value={this.state.비밀번호} onChange={(e)=>this.onChangePw(e.target.value)} onFocus={(e)=>this.onFocusPw(e)}/>
+                                        <input type="password" className="inputText" id="inputPw" placeholder='비밀번호를 입력해주세요' value={this.state.비밀번호} onChange={(e)=>this.onChangePw(e.target.value)} onFocus={(e)=>this.onFocusPw(e)}/>
                                         {
                                             this.state.showPw && (
                                                 <>
@@ -366,7 +521,7 @@ class KurlyComponent extends Component {
                                     </div>
                                     <div className="input-box">
                                         <input type="text" className="inputText" id="inputEmail" placeholder='예: marketkurly@kurly.com' onChange={(e)=>this.onChangeEmail(e.target.value)} value={this.state.이메일} onFocus={(e)=>this.onFocusEmail(e)}/>
-                                        <button className="w120-btn">중복확인</button>
+                                        <button className="w120-btn" onClick={this.onClickEmialModalEvent}>중복확인</button>
                                         {
                                             this.state.showEmail &&(
                                                 <>
@@ -383,8 +538,8 @@ class KurlyComponent extends Component {
                                         <span>휴대폰<i>*</i></span>
                                     </div>
                                     <div className="input-box">
-                                        <input type="text" className="inputText" id="inputPhone" placeholder='숫자만 입력해주세요' onChange={(e)=>this.onChangePhone(e.target.value)} value={this.state.휴대폰}/>
-                                        <button className="w120-btn">인증번호받기</button>
+                                        <input type="text" className="inputText" id="inputPhone" placeholder='숫자만 입력해주세요'maxLength={11} onChange={(e)=>this.onChangePhone(e.target.value)} value={this.state.휴대폰}/>
+                                        <button onClick={this.onClickPhoneEvent} className={`w120-btn ${this.state.isPhoneClass ? '':'phone'}`}>인증번호받기</button>
                                     </div>
                                 </div>
                             </li>
@@ -450,15 +605,25 @@ class KurlyComponent extends Component {
                                     <div className="input-box">
                                         <ul className="date-box">
                                             <li>
-                                                <input type="text" id="year" placeholder='YYYY' onChange={(e)=>this.onChangeYear(e.target.value)} value={this.state.생년}/>
+                                                <input type="text" id="year" placeholder='YYYY' onChange={(e)=>this.onChangeYear(e.target.value)} value={this.state.생년} onFocus={(e)=>this.onFocusEvent(e)} onBlur={(e)=>this.onBlurEvent(e)}/>
                                             </li>    
                                             <li>
                                                 <span>/</span>
                                             </li>    
-                                            <li><input type="text" id="month" placeholder='MM' onChange={(e)=>this.onChangeMonth(e.target.value)} value={this.state.생월}/></li>    
+                                            <li><input type="text" id="month" placeholder='MM' onChange={(e)=>this.onChangeMonth(e.target.value)} value={this.state.생월}  onFocus={(e)=>this.onFocusEvent(e)} onBlur={(e)=>this.onBlurEvent(e)}/></li>    
                                             <li><span>/</span></li>
-                                            <li><input type="text" id="date" placeholder='DD' onChange={(e)=>this.onChangeDate(e.target.value)} value={this.state.생일}/></li>    
-                                        </ul>  
+                                            <li><input type="text" id="date" placeholder='DD' onChange={(e)=>this.onChangeDate(e.target.value)} value={this.state.생일}  onFocus={(e)=>this.onFocusEvent(e)} onBlur={(e)=>this.onBlurEvent(e)}/></li>    
+                                        </ul>
+                                        {
+                                            this.state.showBirthDay && (
+                                                <p className={(
+                                                    this.state.isClassBirthDay===''?'':(this.state.isClassBirthDay===true?'green':'red')
+                                                )}>
+                                                    {this.state.birthDayGideText}
+                                                </p>  
+                                            )
+                                        }
+                                        
                                     </div>
                                 </div>
                             </li>
@@ -559,6 +724,22 @@ class KurlyComponent extends Component {
                             <button type='submit'>가입하기</button>
                         </div>
                     </form>
+                    {/* 모달창 중복확인(아이디, 이메일, 인증번호) */}
+                    {
+                        this.state.isModalOpen && (
+                            <div className="modal">
+                                <div className="container">
+                                    <div className="content-box">
+                                         <p>{this.state.modalText}
+                                         </p>        
+                                    </div>
+                                    <div className="button-box">
+                                        <button className="ok-btn" title='확인' onClick={this.onClickModalClose}>확인</button>
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    }
                 </div>
             </div>
         );
