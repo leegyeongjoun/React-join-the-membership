@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
-import PostCode from './Postcode';
-import './KurlyComponent.scss'
+import Postcode from './Postcode';
+import './KurlyComponent.scss';
 
 class KurlyComponent extends Component {
     constructor(props){
         super(props);
         this.state ={
             아이디: '',
-            아이디ok: '',
+            아이디ok:false,
             아이디중복확인: false,
             비밀번호:'',
             비밀번호1ok:false,
@@ -18,7 +18,27 @@ class KurlyComponent extends Component {
             이메일:'',
             이메일ok:false,
             휴대폰:'',
-            휴대폰ok:'',
+
+            // 인증번호
+            휴대폰인증: '',
+            인증키: '123456',
+
+            //화면에 안 보이기위해  
+            isPhoneOkOpen:false,
+            isPhoneOkClass:true,
+            //타이머 
+            isTimerOpen:true,
+            // 비활성화
+            disabled1:false,
+            disabled2:false,
+            //타이머 분 초
+            minutes:2,
+            seconds:59,
+            counterStart:false,
+            // setinterval 사용
+            setId2 : 0,
+
+            휴대폰ok:false,
             주소:'',
             주소1: '',
             주소2: '',
@@ -54,6 +74,8 @@ class KurlyComponent extends Component {
             showBirthDay:false,
             isClassBirthDay: '',
             birthDayGideText:'',
+
+            
         }
     }
     onMouseDown=(e)=>{
@@ -81,29 +103,29 @@ class KurlyComponent extends Component {
         e.preventDefault();
         this.setState({
             isModalOpen: true,
-            아이디중복확인: true 
+            아이디중복확인: true,
         });
         if(this.state.아이디===''){
             this.setState({
-                modalText:'아이디를 입력해주세요.',
-                아이디ok: false,
+                modalText:'아이디를 입력해주세요',
+                아이디ok:false,
             })
         }else{
-            //아이디를 잘 못 썼을 때
-            if(this.state.isClassId === false){
+            if(this.state.isClassId===false){
                 this.setState({
-                    modalText:'아이디는 6자 이상 16자미만의 영문 혹은 영문과 숫자조합만 가능합니다.',
-                    아이디ok: false,
+                    modalText:'아이디는 6자 이상의 영문 혹은 영문과 숫자 조합만 가능합니다',
+                    아이디ok:false,
                 })
             }else{
+                // 저장돼있는 값과 비교해야한다.
                 this.setState({
                     modalText:'사용가능한 아이디입니다.',
-                    아이디ok: true,
+                    아이디ok:true,
                 })
             }
         }
-    }
-    
+    } 
+
     //중복확인 이메일 클릭 이벤트
     onClickEmailModalEvent=(e) =>{
         e.preventDefault();
@@ -112,42 +134,46 @@ class KurlyComponent extends Component {
         if(this.state.이메일===''){
             this.setState({
                 modalText:'이메일을 입력해 주세요.',
-                이메일ok:false,
-            });
+                이메일ok:false
+            })
 
         }else{
             if(regExp.test(this.state.이메일)===false){
-                this.setState({
-                    modalText:'잘못된 이메일 형식입니다.',
-                    이메일ok:false,
-                })
+                this.setState({modalText:'잘못된 이메일 형식입니다.',
+                이메일ok:false
+            })
             }else{
                 this.setState({
-                    modalText:'사용가능한 이메일입니다.',
-                    이메일ok:true,
+                    modalText:'사용가능한 이메일입니다',
+                    이메일ok:true 
                 })
             }
         }
     }
 
+    //확인 버튼을 눌르면 닫힘
     onClickModalClose=(e) =>{
         e.preventDefault();
+        //false 안보이게 true는 보이게
         this.setState({isModalOpen: false});
 
     }
 
-
+    //비밀번호 창을 눌르면 밑에 조건들이 나타나게 끔
     onFocusPw=(e)=>{
        this.setState({showPw:true}) 
     }
+    // 값이 바뀌면 
     onChangePw=(value)=>{
+        // 내가 쓴 비밀번호로 바뀌게
         this.setState({비밀번호:value})
 
+        // 10자 이상
         const regExp1=/.{10,}/;
         //영문/숫자/특수문자(공백 제외)만 허용하며, 2개 이상 조합
         const regExp2=/((?=.*[A-Za-z])+((?=.*[0-9])+|(!@#$%&-_)+)+)[^\s][A-Za-z0-9!@#$%&-_]{10,}/;
+        // 똑같은 문자 글자가 3개이상 연속 불가
         const regExp3=/(.)\1\1/;
-
 
         if(value===''){
             this.setState({
@@ -155,10 +181,11 @@ class KurlyComponent extends Component {
                 비밀번호1ok: false,
             })
         }else{
+            // 10자 이상일 때
             if(regExp1.test(value)){
                 this.setState({
                     isClassPw1:true,
-                    비밀번호1ok: true,
+                    비밀번호1ok:true,
                 })
             }else{
                 this.setState({
@@ -174,25 +201,27 @@ class KurlyComponent extends Component {
                 비밀번호2ok:false,
             })
         }else{
+            //영문/숫자/특수문자(공백 제외)만 허용하며, 2개 이상 조합일때
             if(regExp2.test(value)){
                 this.setState({
                     isClassPw2:true,
                     비밀번호2ok:true,
                 })
             }else{
-                this.setState(
-                {
+                this.setState({
                     isClassPw2:false,
                     비밀번호2ok:false,
                 })
             }
         }
+
         if(value===''){
             this.setState({
                 isClassPw3:'',
                 비밀번호3ok:false,
             })
         }else{
+            //똑같은 문자가 3개이상 연속사용 안 했을 때
             if(regExp3.test(value)===false){
                 this.setState({
                     isClassPw3:true,
@@ -207,33 +236,40 @@ class KurlyComponent extends Component {
         }
     }
 
+    //비밀번호 확인
     onFocusPwRe=(e) =>{
+        // 밑에 조건이 나오게
         this.setState({showPwRe:true})
     }
     onChangePwRe=(value)=>{
+        // 내가 입력 한 값
         this.setState({비밀번호확인:value})
 
         if(value===''){
             this.setState({isClassPwRe:''})
         }else{
+            // 비밀번호의 값과 확인값이 같을 때
             if(this.state.비밀번호===value){
+                // 초록색
                 this.setState({isClassPwRe:true})
             }else{
+                // 빨간색
                 this.setState({isClassPwRe:false})
             }
         }
     }
 
+    // 내가 입력한 값으로 이름 작성 할 수있도록
     onChangeName=(value)=>{
         this.setState({이름:value})
     }
+    // 조건 보여주게 하는 것
     onFocusEmail=(e)=>{
         this.setState({showEmail: true});
     }
     onChangeEmail=(value)=>{
-        this.setState({
-            이메일:value
-        });
+        this.setState({이메일:value});
+
         // 정규표현식
         //cjh7652@hanmail.net
         //cjh7652@naver.com
@@ -244,7 +280,7 @@ class KurlyComponent extends Component {
         if(value===''){
             this.setState({
                 isClassEmail:'',
-                이메일ok:false,
+                이메일ok:false
             })
         }else{
             if(regExp.test(value)){
@@ -260,33 +296,93 @@ class KurlyComponent extends Component {
             }
         }
     }
-    onChangePhone=(value)=>{
-        this.setState({휴대폰:value.replace(/[^0-9]/g, '')});
 
-        if(this.state.휴대폰.length>=10 && this.state.휴대폰.length<=11){
-            this.setState({isPhoneClass:true})
-        }else{
-            this.setState({isPhoneClass:false})
-        }
+
+    onChangePhone=(value)=>{
+
+        //숫자가 아닌 값이 써지면 빈 값을 넣기 위해
+        let result = value.replace(/[^0-9]/g, '');
         
-       
-    }
-    onClickPhoneEvent=(e) =>{
+        this.setState({휴대폰: result });
+    
+        //휴대폰 번호가 10이상이면 우측에 인증번호받기 버튼이 보인다.
+        if( this.state.휴대폰.length >= 10 ){
+           this.setState({isPhoneClass: true });
+        }
+        else {
+          this.setState({isPhoneClass: false });
+        }
+    
+        //휴대폰 번호 정규표현식
+        // 010 7942 5305
+      }
+  
+    onClickPhoneEvent=(e)=>{
         e.preventDefault();
-        //010 4494 9814
-        //010 223 9814
-        if(!/^010[0-9]{3,4}[0-9]{4}$/g.test(this.state.휴대폰)){
+        // 입력이 완료되고 난 후 인증번호 버튼을 클릭해서 실행
+        if( !/^01[016789]{1}[0-9]{3,4}[0-9]{4}$/g.test(this.state.휴대폰) ){      
+          this.setState({
+              휴대폰ok: false,
+              isModalOpen: true, //모달 열기
+              modalText: '잘못된 휴대폰 번호 입니다. 확인 후 다시 시도 해 주세요.' //가이드 텍스트
+          })
+          return;
+        }
+        else{
+          this.setState({
+              휴대폰ok: true,
+              isModalOpen: true,
+              modalText:'인증번호가 발송되었습니다.',
+            // 인증번호창
+              isPhoneOkOpen: true,
+              disabled1:true,  
+          });
+          this.counterTimer();
+        }
+    }
+    onChangePhoneOk=(value)=>{
+        this.setState({휴대폰인증:value})
+    }
+    onClickPhoneOkEvent = (e) =>{
+        e.preventDefault();
+        if(this.state.휴대폰인증===this.state.인증키){
             this.setState({
                 isModalOpen: true,
-                modalText:'잘못된 휴대폰 번호 입니다. 확인 후 다시 시도해 주세요',
-                휴대폰ok:false
+                modalText: '인증번호가 일치합니다.',
+                isTimerOpen:false,
+                disabled2:true,
+                isPhoneOkClass: false,
             })
-            return ;
+            clearInterval(this.state.setId);
         }else{
-            this.setState({
-                휴대폰ok:true
+            this.state({
+                isModalOpen: true,
+                modalText: '인증번호를 확인하세요.',
+                isTimerOpen:true,
+                disabled2:false,
             })
         }
+    }
+
+    //타이머 함수
+    counterTimer(){
+        let setId2 = setInterval(()=>{
+          this.setState({seconds:this.state.seconds-1}); // 59 58 57 ...
+          if(this.state.seconds<=0){
+            this.setState({
+                seconds:59, //0이되면 59로 초기화 시켜주기
+                minutes:this.state.minutes-1,//1분 감소 시킴
+            });
+            if(this.state.minutes<=0){
+                clearInterval(setId2);
+                this.setState({
+                    seconds:0,
+                    minutes:0,
+                })
+            }
+          }  
+        },1000);
+        this.setState({setId:setId2});
     }
     onChangeAdd=(value)=>{
         this.setState({주소:value})
@@ -311,32 +407,35 @@ class KurlyComponent extends Component {
 
 
     birthDayCheckEventFn=(z) =>{
-        const {생년, 생월, 생일} =this.state;
+        const {생년, 생월, 생일} =this.state;// 구조분해할당
         const lastDate=new Date(생년, 생월, 0).getDate();//0=>말일을 찾아줌, 1=> 다음달 첫날을 찾아줌
         const nowYear=new Date().getFullYear();//2023
-        const nowMonth=new Date().getMonth()+1;//2
+        const nowMonth=new Date().getMonth()+1;//2 0달부터 카운트 하기때문에 +1해줘야 함
         const nowDate=new Date().getDate();//28
         const nowToday=new Date(nowYear,nowMonth, nowDate);//2023.2.28
-        const nowToday14=new Date(nowYear-14,nowMonth, nowDate )
-        const nowToday100=new Date(nowYear-100,nowMonth, nowDate )
-        const birthDay=new Date(생년, 생월, 생일);//1980/04/03
+        const nowToday14=new Date(nowYear-14,nowMonth, nowDate ) // 만 14세 계싼
+        const nowToday100=new Date(nowYear-100,nowMonth, nowDate )  //100세이상 가입 X
+        const birthDay=new Date(생년, 생월, 생일);//1997/10/08
 
         if(생년==='' && 생월==='' && 생일===''){
             return;
         }else{
            //생년 체크
            if(/^(?:1\d\d\d|2\d\d\d)$/g.test(생년)===false){
+                //값을 비교 했을 때 잘못작성
                 this.setState({
                     showBirthDay:true,
                     isClassBirthDay: false,
                     birthDayGideText:'태어난 년도 4자리를 정확하게 입력해 주세요'
                 })
            }else{
+                //제대로 작성
                 this.setState({
                     showBirthDay:false,
                     isClassBirthDay: '',
                     birthDayGideText:'',
                 })
+                //생월 비교 잘 못 작성했을 때
                 if(/^(?:0?[1-9]|1[012])$/g.test(생월)===false){
                     this.setState({
                         showBirthDay:true,
@@ -349,6 +448,7 @@ class KurlyComponent extends Component {
                         isClassBirthDay: '',
                         birthDayGideText:'',
                     })
+                    //생일을 잘못 작성했을 때와 생일의 lastDate가 크면 즉, 마지막 달보다 크다면 2월달 28 29가 있고 3월은 31인데 32를 썼을 때 
                     if(/^(?:0?[1-9]|1[0-9]|2[0-9]|3[0-1])$/g.test(생일)===false || 생일 > lastDate){
                         this.setState({
                             showBirthDay:true,
@@ -361,7 +461,7 @@ class KurlyComponent extends Component {
                             isClassBirthDay: '',
                             birthDayGideText:'',
                         })
-                        //미래
+                        //미래로 작성 했을 때
                         if(birthDay>nowToday){
                             this.setState({
                                showBirthDay:true,
@@ -374,7 +474,7 @@ class KurlyComponent extends Component {
                                 showBirthDay:false,
                                 isClassBirthDay:'',
                                 birthDayGideText:'' 
-                             })
+                            })
                         }
                         //만14세 가입 불가
                         if(birthDay>nowToday14){
@@ -382,14 +482,14 @@ class KurlyComponent extends Component {
                                 showBirthDay:true,
                                 isClassBirthDay:false,
                                 birthDayGideText:'만 14세 미만은 가입이 불가합니다.' 
-                             })
+                            })
                              return;
                         }else{
                             this.setState({
                                 showBirthDay:false,
                                 isClassBirthDay:'',
                                 birthDayGideText:'' 
-                             })
+                            })
                         }
                         //100세 이상 가입 불가
                         if(birthDay<nowToday100){
@@ -397,21 +497,21 @@ class KurlyComponent extends Component {
                                 showBirthDay:true,
                                 isClassBirthDay:false,
                                 birthDayGideText:'생년월일을 다시 확인해주세요.' 
-                             })
+                            })
                              return;
                         }else{
                             this.setState({
                                 showBirthDay:false,
                                 isClassBirthDay:'',
                                 birthDayGideText:'' 
-                             })
+                            })
                         }
                     }
                 }
-
-           }
+            }
         }
     }
+    //안에 내용들 체크하게
     onFocusEvent=(z)=>{
         this.birthDayCheckEventFn(z);
     }
@@ -420,20 +520,20 @@ class KurlyComponent extends Component {
     }
     onChangeYear=(value)=>{
         this.setState({생년:value});
-        const regExp=/(?:1\d\d\d|2\d\d\d)/g;
-        console.log(regExp.test(value))
+        // const regExp=/(?:1\d\d\d|2\d\d\d)/g;
+        // console.log(regExp.test(value))
     }
     onChangeMonth=(value)=>{
         this.setState({생월:value})
         //1-12
-        const regExp=/^(?:0?[1-9]|1[012])$/g;
-        console.log(regExp.test(value))
+        // const regExp=/^(?:0?[1-9]|1[012])$/g;
+        // console.log(regExp.test(value))
     }
     onChangeDate=(value)=>{
         this.setState({생일:value})
         //01-31 01 10 20 30 
-        const regExp=/^(?:0?[1-9]|1[0-9]|2[0-9]|3[0-1])$/g;
-        console.log(regExp.test(value))
+        // const regExp=/^(?:0?[1-9]|1[0-9]|2[0-9]|3[0-1])$/g;
+        // console.log(regExp.test(value))
     }
     onChangeChoocheon=(value)=>{
         this.setState({추가입력사항:value})
@@ -441,59 +541,77 @@ class KurlyComponent extends Component {
     
     onChangeAddress1=(value)=>{
         this.setState({주소1:value});
-        this.setState({isAddressInputShow:true});
-        this.setState({isAddressOn:false});
+        this.setState({isAddressInputShow:true});//주소재검색 버튼
+        this.setState({isAddressOn:false});// 검색이 완료되면 초기화 시키기위해서
     }
     onChangeAddress2=(value) =>{
         this.setState({주소2:value})
-    }
-    onChangeCheckEvent=(checked, value)=>{
-        let result = '';
-        if(checked){
-            if(value==='SNS' && this.state.약관동의.includes('이메일')){
-               this.setState({약관동의: [...this.state.약관동의, 'SNS','무료배송, 할인쿠폰 등 혜택/정보 수신 동의 (선택)']}) 
-            }
-           else if(value==='이메일' && this.state.약관동의.includes('SNS')){
-                this.setState({약관동의: [...this.state.약관동의, '이메일','무료배송, 할인쿠폰 등 혜택/정보 수신 동의 (선택)']})
-            }
-           else if(value==='무료배송, 할인쿠폰 등 혜택/정보 수신 동의 (선택)' && this.state.약관동의.includes('SNS') && !this.state.약관동의.includes('이메일')){
-                this.setState({약관동의: [...this.state.약관동의, '이메일', value ]})
-            } 
-             else if(value==='무료배송, 할인쿠폰 등 혜택/정보 수신 동의 (선택)' && !this.state.약관동의.includes('SNS') && this.state.약관동의.includes('이메일')){
-                this.setState({약관동의: [...this.state.약관동의, 'SNS', value ]})
-            } 
-           else if(value==='무료배송, 할인쿠폰 등 혜택/정보 수신 동의 (선택)' && this.state.약관동의.includes('SNS') && this.state.약관동의.includes('이메일')){
-                this.setState({약관동의: [...this.state.약관동의,  value ]})
-            }
-            else if(value==='무료배송, 할인쿠폰 등 혜택/정보 수신 동의 (선택)' && !this.state.약관동의.includes('SNS') && !this.state.약관동의.includes('이메일')){
-                this.setState({약관동의: [...this.state.약관동의,'이메일','SNS',  value ]})
-            } 
-            else{
-                this.setState({약관동의:[...this.state.약관동의, value]})
-            }
-            
-        }else{
-            if(value==='무료배송, 할인쿠폰 등 혜택/정보 수신 동의 (선택)'){
-                result=this.state.약관동의.filter((item) => item!==value);
-                result=result.filter((item) => item!=='SNS')
-                result=result.filter((item) => item!=='이메일')
-                
-            }else if(value==='SNS'){
-                result=this.state.약관동의.filter((item) => item!==value);
-                result=result.filter((item) => item!=='무료배송, 할인쿠폰 등 혜택/정보 수신 동의 (선택)')
-            } else if(value==='이메일'){
-                result=this.state.약관동의.filter((item) => item!==value);
-                result=result.filter((item) => item!=='무료배송, 할인쿠폰 등 혜택/정보 수신 동의 (선택)')
-            }else{
-                result=this.state.약관동의.filter((item) => item!==value);
-            } 
-            this.setState({약관동의: result});
-        }
     }
     onClickAddress = (e) => {
         e.preventDefault();
         this.setState({isAddressOn:true});
     }
+    onChangeCheckEvent = (checked, value) => {
+        let result = '';// true인 친구를 누적해야 함
+        if(checked){
+            //둘 다 참일 때 SMS가 선택 돼있고 약관동의의 이메일값이 가지고 있다면(checked가 돼있는 상태)
+            if(value==='SMS' && this.state.약관동의.includes('이메일')){
+                // 변경되는 값에 약관동의에있는 기존에 있던것에 SMS와 무료배송---이 체크가 되게 하는 것
+                this.setState({약관동의: [...this.state.약관동의, 'SMS', '무료배송, 할인쿠폰 등 혜택/정보 수신 동의 (선택)']})
+            }
+            //SMS를 포함하고 있고 이메일을 클릭을 하면
+            else if(value==='이메일' && this.state.약관동의.includes('SMS')){
+                // 변경되는 값에 약관동의에있는 기존에 있던것에 SMS와 무료배송---이 체크가 되게 하는 것
+                this.setState({약관동의: [...this.state.약관동의, '이메일', '무료배송, 할인쿠폰 등 혜택/정보 수신 동의 (선택)']})
+            }
+            //value값의 SMS선택 돼있고 이메일이 선택이 안 돼있을 때 무료배송---을 눌렀을 때 이메일까지 체크가 되게
+            else if(value==='무료배송, 할인쿠폰 등 혜택/정보 수신 동의 (선택)' && this.state.약관동의.includes('SMS') && !this.state.약관동의.includes('이메일')){
+                // value값과 이메일 값까지 체크가 되게
+                this.setState({약관동의: [...this.state.약관동의, '이메일', value]})
+            }
+            //value값의 이메일선택 돼있고 SMS가 선택이 안 돼있을 때 무료배송---을 눌렀을 때 이메일까지 체크가 되게
+            else if(value==='무료배송, 할인쿠폰 등 혜택/정보 수신 동의 (선택)' && !this.state.약관동의.includes('SMS') && this.state.약관동의.includes('이메일')){
+                // 이메일만 체크 돼있을 때 무료배송을 눌르면 value값과 SMS값이 체크되게
+                this.setState({약관동의: [...this.state.약관동의, 'SMS', value]})
+            }
+            //SMS포함 이메일도 포함 돼있으면
+            else if(value==='무료배송, 할인쿠폰 등 혜택/정보 수신 동의 (선택)' && this.state.약관동의.includes('SMS') && this.state.약관동의.includes('이메일')){
+                // value값이 보이라고 하기
+                this.setState({약관동의: [...this.state.약관동의, value]})
+            }
+            // SMS와 이메일이 포함되지 않았을 때
+            else if(value==='무료배송, 할인쿠폰 등 혜택/정보 수신 동의 (선택)' && !this.state.약관동의.includes('SMS') && !this.state.약관동의.includes('이메일')){
+                // 이메일 SMS value값이 나타나게
+                this.setState({약관동의: [...this.state.약관동의,'이메일','SMS', value]})
+            }
+            else{
+                //value값을 가지고오는데 이 value값은 밑에 imsi 선택하면 imsi 값으로 바뀜
+                this.setState({약관동의:[...this.state.약관동의, value]})
+            }
+        // 체크 안되는 부분
+        }else{
+                //value가 선택이 되면
+            if(value==='무료배송, 할인쿠폰 등 혜택/정보 수신 동의 (선택)'){
+                // 빈값에 약관동의에서 value값이 아닌 것을 filter해서 result에 넣기
+                result = this.state.약관동의.filter((item)=>item !== value); //value값이 없다는 얘기임, item은 imsi안에 내용들  내가 선택한 값이 아니면 result값에 넣기
+                result = result.filter((item) => item!=='SMS');//SNS가 없으면 result대입
+                result = result.filter((item) => item!=='이메일');//이메일이 없으면 result대입
+            }else if(value==='SMS'){
+                result = this.state.약관동의.filter((item)=>item !== value); //value값이 없다는 얘기임, item은 imsi안에 내용들  내가 선택한 값이 아니면 result값에 넣기 SMS가없다는 얘기임
+                result = result.filter((item) => item!=='무료배송, 할인쿠폰 등 혜택/정보 수신 동의 (선택)');//SNS가 없으면 result대입
+            }
+            else if(value==='이메일'){
+                result = this.state.약관동의.filter((item)=>item !== value); //value값이 없다는 얘기임, item은 imsi안에 내용들  내가 선택한 값이 아니면 result값에 넣기
+                result = result.filter((item) => item!=='무료배송, 할인쿠폰 등 혜택/정보 수신 동의 (선택)');//SNS가 없으면 result대입
+            }else{
+                result = this.state.약관동의.filter((item)=>item !== value);
+            }
+            this.setState({약관동의: result});//값을 대입해 주는 값
+            // result = this.state.약관동의.filter((item)=>item !== value); //value값이 없다는 얘기임, item은 imsi안에 내용들  내가 선택한 값이 아니면 result값에 넣기
+            // this.setState({약관동의: result});
+        }
+    }
+   
      onChangeCheckEventAll=(checked, value)=>{
         let imsi=[
             `이용약관동의 (필수)`,
@@ -515,98 +633,171 @@ class KurlyComponent extends Component {
     //2. 검증된 데이터 전송 저장
     //3. 초기화 
     //4. 중복확인 데이터 검증 아이디, 이메일
-    OnSubmitEvent=(e)=>{
+    onSubmitEvent=(e)=>{
         e.preventDefault();
         
-    
-        const {아이디, 비밀번호, 이름, 이메일, 휴대폰,  주소, 주소1, 주소2, 아이디ok, 비밀번호1ok,  비밀번호2ok,  비밀번호3ok,  이메일ok,  휴대폰ok, 약관동의, 성별, 추가입력사항, 생년, 생월, 생일} =this.state;
-        if(아이디==='' || 비밀번호 ==="" || 이름==="" || 이메일==="" || 휴대폰 === "" ||  주소===""){
+        //구조분해할당
+        const { 
+                아이디, 비밀번호, 이름, 이메일, 휴대폰,  주소1, 주소2, 주소, 성별, 생년, 생월, 생일, 추가입력사항, 약관동의,
+                아이디ok, 비밀번호1ok, 비밀번호2ok, 비밀번호3ok, 이메일ok, 휴대폰ok, 아이디중복확인
+        } = this.state;      
+        
+        // 비어있는지 물어보는 것
+        if(아이디==='' || 비밀번호 === '' || 이름 === '' ||  이메일==='' || 휴대폰==='' || 주소1==='' || 주소2==='' ){
             if(아이디===''){
+              this.setState({
+                isModalOpen : true,
+                modalText : '아이디를 입력해주세요.'
+              })
+            }
+            else if(비밀번호===''){
+              this.setState({
+                isModalOpen : true,
+                modalText : '비밀번호를 입력해주세요.'
+              })
+            }
+            else if(이름===''){
+              this.setState({
+                isModalOpen : true,
+                modalText : '이름을 입력해주세요.'
+              })
+            }
+            else if(이메일===''){
+              this.setState({
+                isModalOpen : true,
+                modalText : '이메일을 입력해주세요.'
+              })
+            }
+            else if(휴대폰===''){
+              this.setState({
+                isModalOpen : true,
+                modalText : '휴대폰을 입력해주세요.'
+              })
+            }
+            /* else if(주소===''){
+              this.setState({
+                isModalOpen : true,
+                modalText : '주소를 입력해주세요.'
+              })
+            }   */      
+            return;
+        }
+        else {
+    
+            console.log( '아이디ok' , 아이디ok  );
+            console.log( '비밀번호1ok' , 비밀번호1ok  );
+            console.log( '비밀번호2ok' , 비밀번호2ok  );
+            console.log( '비밀번호3ok' , 비밀번호3ok  );
+            console.log( '이메일ok' , 이메일ok  );
+            console.log( '휴대폰ok' , 휴대폰ok  );
+            console.log( '아이디중복확인' , 아이디중복확인  );
+    
+            //입력값 규칙을 어기면 입력취소
+            if( 아이디ok===false || 비밀번호1ok===false ||  비밀번호2ok===false ||  비밀번호3ok===false ||  이메일ok===false ||  휴대폰ok===false ||  아이디중복확인===false  ){
+              
+              if(아이디ok===false){
                 this.setState({
-                    isModalOpen:true,
-                    modalText:'아이디를 입력해주세요'
+                  isModalOpen : true,
+                  modalText : '아이디는 6자 이상의 영문 혹은 영문과 숫자 조합만 가능합니다'
                 })
-            }else if(비밀번호===''){
+              }        
+              else if(이메일ok===false){
                 this.setState({
-                    isModalOpen:true,
-                    modalText:'비밀번호를 입력해주세요'
+                  isModalOpen : true,
+                  modalText : '잘못된 이메일 형식입니다.'
                 })
-            }else if(이름===''){
-                this.setState({
-                    isModalOpen:true,
-                    modalText:'이름을 입력해주세요'
-                })
-            }else if(이메일===''){
-                this.setState({
-                    isModalOpen:true,
-                    modalText:'이메일을 입력해주세요'
-                })
-            }else if(휴대폰===''){
-                this.setState({
-                    isModalOpen:true,
-                    modalText:'휴대폰을 입력해주세요'
-                })
-            }/* else if(주소===''){
-                this.setState({
-                    isModalOpen:true,
-                    modalText:'주소를 입력해주세요'
-                })
-            }  */
-
-        }else{
-            //입력값이 잘못 입력되면 입력 취소
-            if(아이디ok===false || 비밀번호1ok===false || 비밀번호2ok===false || 비밀번호3ok===false || 이메일ok===false || 휴대폰ok===false  ){
-                if(아이디ok===false){
-                    this.setState({
-                        isModalOpen:true,
-                        modalText:'6자이상 16자 미만'
-                    })
-                }else if(이메일ok===false){
-                    this.setState({
-                        isModalOpen:true,
-                        modalText:'잘못된 이메일 형식입니다.'
-                    })
-                }
-                return;
-            }else{ //정상적으로 입력이 되면
-               let cnt=0;
-               console.log(약관동의)
-               for(let i=0; i<약관동의.length; i++){
-                    if(약관동의[i].indexOf('필수') >= 0){ //indexOf는 찾는 문자가 없으면 -1값을 나타내주고 찾는 문자가있으면 정수로 나타내준다.
-                        cnt++; //3개가 나와야 함 필수가 3개있기 때문에
-
+              }
+              return;
+            }//아니면 정상 데이터 전송
+            else {
+                let cnt=0;
+                console.log( 약관동의 );
+                //약관동의 필수 3개 체크 해야 전송
+                for(let i=0; i<약관동의.length; i++){
+                    if( 약관동의[i].indexOf('필수') >=0 ){ //찾았다면 못찾으면 -1
+                       cnt++; 
                     }
-                    if(cnt < 3){
-                        this.setState({
-                            isModalOpen:true,
-                            modalText:"약관동의 필수 선택사항이 체크되지 않았습니다."
-                        })
-                        return;
-                    }else{
-                        //모든 조건이 만족하면 전송 저장
-                        //임시객체 생성
-                        //localstorage JSON.stringify() 문자열 형식으로 변환해서 저장
-                        const 가입회원정보 = {
+                }
+                
+                console.log( cnt );
+                //필수가 3개인데 3보다 작으면 선택이 되지 않은 것 임으로 선택하라는 창을 만들어준다.
+                if(cnt < 3){
+                  this.setState({
+                    isModalOpen : true,
+                    modalText : '약관동의 필수 선택사항 선택하세요.'
+                  })
+                  return;
+                }
+                else { //모든 조건 만족하고 그리고 전송 저장
+    
+                      //1. 임시객체 생성 
+                      //2. JSON.stringify() 객체라 문자열 형식으로 변환
+                      const 가입회원정보 = {
                             아이디: 아이디,
                             비밀번호: 비밀번호,
                             이름: 이름,
                             이메일: 이메일,
                             휴대폰: 휴대폰,
-                            주소: `${주소1} ${주소2}`,
+                            주소: ` ${주소1} ${주소2}`,
                             성별: 성별,
-                            생년월일: `${생년}-${생월}-${생일}`,
+                            생년월일: `${생년} ${생월} ${생일}`,
                             추가입력사항: 추가입력사항,
                             약관동의: 약관동의,
-                        }
-                        
-                        //저장
-                        localStorage.setItem(가입회원정보.아이디, JSON.stringify(가입회원정보))
-                    }
-               }
+                      }
+    
+                      //저장                            key값    value값
+                      localStorage.setItem(가입회원정보.아이디, JSON.stringify(가입회원정보));
+    
+                      //초기화
+                       this.setState({
+                            아이디: '',
+                            아이디ok: false,
+                            아이디중복확인: false,
+                            비밀번호: '',
+                            비밀번호1ok: false,
+                            비밀번호2ok: false,
+                            비밀번호3ok: false,
+                            비밀번호확인: '',
+                            이름: '',
+                            이름ok: false,
+                            이메일: '',
+                            이메일ok: false,
+                            휴대폰: '',
+                            휴대폰ok: false,
+                            주소1: '',
+                            주소2: '',
+                            주소: '',
+                            성별: '선택안함', //라디오버튼
+                            생년:'',
+                            생월:'',
+                            생일:'',
+                            생년월일: '',
+                            추가입력사항: '',  //라디오버튼
+                            약관동의: [],     //체크박스 다중선택 저장 객체 배열
+                            isAddressOn: false,  //주소검색을 클릭하면 true로 변환 그럼 주소검색창이 열린다.
+                            isAddrInputShow: false,  //주소검색을 클릭하면 true로 변환 그럼 주소검색창이 열린다.
+                            showId: false, //아이디의 가이드텍스트 show        
+                            isClassId:'',  //클래스를 '' : true : false
+                            showPw: false, //비밀번호의 가이드텍스트 show   
+                            isClassPw1:'', //클래스를 '' : true : false
+                            isClassPw2:'', 
+                            isClassPw3:'',
+                            showPwRe: false, //비밀번호확인  
+                            isClassPwRe:'',
+                            showEmail:false,
+                            isClassEmail:'', //이메일
+                            isModalOpen : false, //모달창 show & hide
+                            modalText : '',  //아이디/이메일/인증번호받기 가이드 텍스트
+                            isPhoneClass: false, //휴대폰 버튼 클래스
+                            showBirthDay: false, //show hide
+                            isClassBirthDay:'', //'',true, false
+                            birthDayGuideText:'', //가이드텍스트 여러가지 내용
+                      });
+                }
             }
         }
-
-    }
+    
+      }
     render() {
         return (
             <div id="kurly">
@@ -616,7 +807,7 @@ class KurlyComponent extends Component {
                 <div className="content">
                     <h2>회원가입</h2>
                     <h4><span><i>*</i>필수입력사항</span></h4>
-                    <form action="#" onSubmit={this.OnSubmitEvent}>
+                    <form  onSubmit={this.onSubmitEvent}>
                         <ul>
                             <li>
                                 <div className="gap">
@@ -717,7 +908,25 @@ class KurlyComponent extends Component {
                                     </div>
                                     <div className="input-box">
                                         <input type="text" className="inputText" id="inputPhone" placeholder='숫자만 입력해주세요' value={this.state.휴대폰} onChange={(e)=> this.onChangePhone(e.target.value)} />
-                                        <button onClick={this.onClickPhoneEvent} className={`w120-btn ${this.state.isPhoneClass ? '': 'phone'}`}>인증번호받기</button>
+                                        <button disabled={this.disabled1} onClick={this.onClickPhoneEvent} className={`w120-btn ${this.state.isPhoneClass ? '': 'phone'}`}>인증번호받기</button>
+                                        
+                                        {
+                                            this.state.isPhoneOkOpen && (
+                                                <>
+                                                    <input type="text" max-length='6' className='inputText' id='inputPhone1' placeholder='인증번호를 입력하세요' value={this.state.휴대폰인증} disabled={this.disabled2} onChange={(e) => this.onChangePhoneOk(e.target.value)}/>
+                                                    <button className={`w120-btn phoneok-btn ${this.state.isPhoneOkClass ? '' : 'phone'}`} disabled={this.disabled2} onClick={this.onClickPhoneOkEvent} >인증번호확인</button>
+
+                                                    {
+                                                        this.state.isTimerOpen && (
+                                                            // 10보다 작으면 앞에 0 입력
+                                                            <span className="counter-timer-box">{this.state.minutes}:{this.state.seconds<10 ? `0${this.state.seconds}` : this.state.seconds}</span>
+                                                        )
+                                                    }
+                                                </>
+                                            )
+                                        }
+                                        
+                                   
                                     </div>
                                 </div>
                             </li>
@@ -748,7 +957,7 @@ class KurlyComponent extends Component {
                                          </button>
                                         <div id="postcode">
                                             {
-                                                this.state.isAddressOn && ( <PostCode  onChangeAddress1={this.onChangeAddress1} />)
+                                                this.state.isAddressOn && ( <Postcode  onChangeAddress1={this.onChangeAddress1} />)
                                             }
                                            
                                         </div>

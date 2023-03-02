@@ -74,6 +74,7 @@ a{text-decoration: none; color: #222;}
                     height: 45px;
                     border: 1px solid #ccc;
                     border-radius: 3px;
+                    position: relative;
                     &::placeholder{
                         color: #bbb;
                         font-size: 14px;
@@ -85,6 +86,16 @@ a{text-decoration: none; color: #222;}
                     img{
                         vertical-align:bottom;
                     }
+                }
+                .counter-timer-box{
+                    position: absolute;
+                    right: 32%;
+                    bottom: 15px;
+                    font-size: 13px;
+                    color: #f00;
+                }
+                #inputPhone1{
+                    margin-top: 10px;
                 }
                 .w120-btn{
                     width: 120px;
@@ -102,6 +113,9 @@ a{text-decoration: none; color: #222;}
                     &.phone{
                         border: 1px solid #ccc;
                         color: #ccc;
+                    }
+                    &.phoneok-btn{
+                        top: 55px;
                     }
                 }
             }
