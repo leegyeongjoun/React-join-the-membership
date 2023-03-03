@@ -147,7 +147,17 @@ a{text-decoration: none; color: #222;}
             }
             .radio-box{
                 width: 53%;
+                display: flex;  
+            }
+            .radio-box2{
                 display: flex;
+                width: 350px;
+            }
+            .add-input-box{
+                margin-top: 10px;
+                .inputText{
+                    width: 70%;
+                }
             }
             .date-box{
                 display: flex;

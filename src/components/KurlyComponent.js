@@ -40,14 +40,19 @@ class KurlyComponent extends Component {
 
             휴대폰ok:false,
             주소:'',
-            주소1: '',
-            주소2: '',
+            주소1:'',
+            주소2:'',
             성별:'선택안함',
             생년:'',
-            생월: '',
+            생월:'',
             생일:'',
             생년월일:'',
             추가입력사항:'',
+            // 추천인 아이디
+            isAddInputBoxShow: false,
+            addInputPlaceHolder: '',
+            추가입력상자:'',
+
             약관동의: [],
             isAddressOn:false,
             isAddressInputShow:false,
@@ -74,7 +79,6 @@ class KurlyComponent extends Component {
             showBirthDay:false,
             isClassBirthDay: '',
             birthDayGideText:'',
-
             
         }
     }
@@ -83,21 +87,72 @@ class KurlyComponent extends Component {
     }
     onChangeId=(value)=>{
         this.setState({아이디:value});
-        //글자길이 6자이상 16자 이하
-        //영문과 숫자조합
+        this.inputIdText=value;
+       /*  this.idDoubleCheck(value); */
 
-        const regexp=/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9]{6,16}$/;
+         //글자길이 6자이상 16자 이하
+        //영문과 숫자조합
+        const regexp=/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9]{6,16}$/g;
         if(value===''){
-            this.setState({isClassId:''});
+            this.setState({isClassId:'', 아이디ok:false});
         }else{
             if(regexp.test(value)){
-                this.setState({isClassId: true});
+                this.setState({isClassId: true, 아이디ok:true});
             }else{
-                this.setState({isClassId: false});
+                this.setState({isClassId: false, 아이디ok:false});
             }
         }
     }
 
+    //아이디 중복확인 반복처리문
+    //1. 아이디에 입력값 === 저장된 아이디 비교
+    //2. localstorage 데이터에서 전체 추출
+    //3. 그 중에서 id만 추출
+    //4. 반복처리후 비교하여 같은 아이디가 있다면 true로 변환
+    //5. 결과 true면 이미 등록된 아이디 입니다.
+    //6. 결과가 false이면 사용가능한 아이디 입니다.
+  /*   idDoubleCheck(value){
+        const inputId=value;
+        let imsiArr=[]; //데이터베이스 임시객체
+        let ok=false; */
+        /* let imsi='otz4193' */
+        
+       /*  for(let i=0; i<localStorage.length; i++){ */
+            /* if(imsiArr.push(JSON.parse(localStorage.getItem(localStorage.key(i))).아이디 === inputId)){
+                ok=true;
+                   
+            } */
+           /*  imsiArr.push(JSON.parse(localStorage.getItem(localStorage.key(i))).아이디)
+            if(imsiArr[i]===inputId){
+                ok=true
+            }
+            console.log('inputId:',inputId);
+            console.log(imsiArr); */
+            /* else{ok=false} */
+        /* }
+        for(let i=0; i<imsiArr.length; i++){
+            if(inputId===imsiArr[i].아이디){
+                
+                ok=true;
+                
+                return;
+                
+            }
+            
+        }
+        if(ok!==true){
+            this.setState({
+                아이디ok:true,
+                modalText:'사용 가능한 아이디 입니다'
+            })
+        }else{
+            this.setState({
+                아이디ok:false,
+                modalText:'이미 등록된 아이디 입니다'
+            })
+        }
+        
+    } */
     //중복확인
     onClickIdModalEvent=(e) =>{
         e.preventDefault();
@@ -117,11 +172,25 @@ class KurlyComponent extends Component {
                     아이디ok:false,
                 })
             }else{
-                // 저장돼있는 값과 비교해야한다.
+                let imsiDb=[];
+
+                for(let i=0; i<localStorage.length; i++){
+                    imsiDb.push(JSON.parse(localStorage.getItem(localStorage.key(i))))
+                   
+                }
+                console.log(imsiDb)
+               let result=imsiDb.map((item) =>item.아이디===this.inputIdText);
+               if(result.includes(true)){
+                    this.setState({
+                        modalText:'중복된 아이디 입니다',
+                        아이디ok: false
+                    })
+               }else{
                 this.setState({
-                    modalText:'사용가능한 아이디입니다.',
-                    아이디ok:true,
+                    modalText:'사용가능한 아이디 입니다',
+                    아이디ok: true
                 })
+               }
             }
         }
     } 
@@ -131,23 +200,38 @@ class KurlyComponent extends Component {
         e.preventDefault();
         const regExp=/^[A-Za-z0-9]+(.[A-Za-z0-9-_])*@[A-Za-z]+(.[A-Za-z])+(.[A-Za-z]{2,3})$/;
         this.setState({isModalOpen: true});
-        if(this.state.이메일===''){
+        if(this.emailValue===''){
             this.setState({
                 modalText:'이메일을 입력해 주세요.',
                 이메일ok:false
             })
 
         }else{
-            if(regExp.test(this.state.이메일)===false){
+            if(regExp.test(this.emailValue)===false){
                 this.setState({modalText:'잘못된 이메일 형식입니다.',
                 이메일ok:false
             })
-            }else{
-                this.setState({
-                    modalText:'사용가능한 이메일입니다',
-                    이메일ok:true 
-                })
-            }
+            }else{//이메일 정상일 때
+                let imsiDb = [];
+
+                for(let i=0; i<localStorage.length; i++){
+                    imsiDb.push(JSON.parse(localStorage.getItem(localStorage.key(i))))
+                    
+                }
+                // console.log(imsiDb);
+                let result=imsiDb.map((item)=> item.이메일===this.inputEmailtext);
+                if(result.includes(true)){
+                    this.setState({
+                        modalText:"중복된 이메일입니다.",
+                        이메일ok:false
+                    })
+                }else{
+                    this.setState({
+                        modalText:"사용가능한 이메일입니다.",
+                        이메일ok: true
+                    })
+                }
+            }    
         }
     }
 
@@ -268,6 +352,8 @@ class KurlyComponent extends Component {
         this.setState({showEmail: true});
     }
     onChangeEmail=(value)=>{
+        this.emailValue=value;//this를 사용하면 전역변수
+        this.inputEmailtext=value;
         this.setState({이메일:value});
 
         // 정규표현식
@@ -343,45 +429,46 @@ class KurlyComponent extends Component {
     onChangePhoneOk=(value)=>{
         this.setState({휴대폰인증:value})
     }
-    onClickPhoneOkEvent = (e) =>{
+    onClickPhoneOkEvent=(e) =>{
         e.preventDefault();
+
         if(this.state.휴대폰인증===this.state.인증키){
             this.setState({
-                isModalOpen: true,
-                modalText: '인증번호가 일치합니다.',
-                isTimerOpen:false,
+                isModalOpen:true,
+                modalText:'인증번호가 완료되었습니다.',
+                isTimerOpen: false,
                 disabled2:true,
-                isPhoneOkClass: false,
-            })
+                isPhoneOkClass:false
+            });
             clearInterval(this.state.setId);
         }else{
-            this.state({
-                isModalOpen: true,
-                modalText: '인증번호를 확인하세요.',
-                isTimerOpen:true,
-                disabled2:false,
+            this.setState({
+                isModalOpen:true,
+                modalText:'인증번호 확인하세요',
+                isTimerOpen: true,
+                disabled2:false
             })
         }
-    }
+    }   
 
     //타이머 함수
     counterTimer(){
-        let setId2 = setInterval(()=>{
-          this.setState({seconds:this.state.seconds-1}); // 59 58 57 ...
-          if(this.state.seconds<=0){
-            this.setState({
-                seconds:59, //0이되면 59로 초기화 시켜주기
-                minutes:this.state.minutes-1,//1분 감소 시킴
-            });
-            if(this.state.minutes<=0){
-                clearInterval(setId2);
+        let setId2=setInterval(()=>{
+            this.setState({seconds:this.state.seconds-1});
+            if(this.state.seconds<=0){
                 this.setState({
-                    seconds:0,
-                    minutes:0,
-                })
+                    seconds:59,
+                    minutes:this.state.minutes-1 //1분감소
+                });
+                if(this.state.minutes<=0){
+                    clearInterval(setId2);
+                    this.setState({
+                        seconds:0,
+                        minutes:0
+                    })
+                }
             }
-          }  
-        },1000);
+        },300);
         this.setState({setId:setId2});
     }
     onChangeAdd=(value)=>{
@@ -390,7 +477,6 @@ class KurlyComponent extends Component {
     onChangeGender=(value)=>{
         this.setState({성별:value})
     }
-
     //생년월일 체크 함수
     //1.생년
     //1900-2999
@@ -403,9 +489,6 @@ class KurlyComponent extends Component {
    //만 14세 미만 가입 불가
    //만 100세 초과 가입 불가
    //생년월일 저장
-
-
-
     birthDayCheckEventFn=(z) =>{
         const {생년, 생월, 생일} =this.state;// 구조분해할당
         const lastDate=new Date(생년, 생월, 0).getDate();//0=>말일을 찾아줌, 1=> 다음달 첫날을 찾아줌
@@ -535,10 +618,26 @@ class KurlyComponent extends Component {
         // const regExp=/^(?:0?[1-9]|1[0-9]|2[0-9]|3[0-1])$/g;
         // console.log(regExp.test(value))
     }
-    onChangeChoocheon=(value)=>{
-        this.setState({추가입력사항:value})
+    onChangeChoocheon=(value, id)=>{
+        if(id==='event'){
+            this.setState({
+                추가입력사항:value,
+                isAddInputBoxShow:true,
+                addInputPlaceHolder:'참여 이벤트명을 입력해주세요.'
+            })
+        }else{//id일 때
+            this.setState({
+                추가입력사항:value,
+                isAddInputBoxShow:true,
+                addInputPlaceHolder:'추천인 아이디를 입력해주세요.'
+            })
+        }
     }
-    
+    onChangeAddInputBox=(value)=>{
+        this.setState({
+            추가입력상자:value
+        })
+    }
     onChangeAddress1=(value)=>{
         this.setState({주소1:value});
         this.setState({isAddressInputShow:true});//주소재검색 버튼
@@ -551,6 +650,10 @@ class KurlyComponent extends Component {
         e.preventDefault();
         this.setState({isAddressOn:true});
     }
+
+    //추가 입력사항 라디오 버튼 체인지 이벤트
+    
+
     onChangeCheckEvent = (checked, value) => {
         let result = '';// true인 친구를 누적해야 함
         if(checked){
@@ -639,7 +742,7 @@ class KurlyComponent extends Component {
         //구조분해할당
         const { 
                 아이디, 비밀번호, 이름, 이메일, 휴대폰,  주소1, 주소2, 주소, 성별, 생년, 생월, 생일, 추가입력사항, 약관동의,
-                아이디ok, 비밀번호1ok, 비밀번호2ok, 비밀번호3ok, 이메일ok, 휴대폰ok, 아이디중복확인
+                아이디ok, 비밀번호1ok, 비밀번호2ok, 비밀번호3ok, 이메일ok, 휴대폰ok, 아이디중복확인,추가입력상자
         } = this.state;      
         
         // 비어있는지 물어보는 것
@@ -742,9 +845,12 @@ class KurlyComponent extends Component {
                             성별: 성별,
                             생년월일: `${생년} ${생월} ${생일}`,
                             추가입력사항: 추가입력사항,
+                            추가입력상자: 추가입력상자,
                             약관동의: 약관동의,
+                            가입일자: `${new Date().getFullYear()}-${new Date().getMonth()+1}-${new Date().getDate()}`,
+                            
                       }
-    
+                      console.log(가입회원정보)
                       //저장                            key값    value값
                       localStorage.setItem(가입회원정보.아이디, JSON.stringify(가입회원정보));
     
@@ -764,6 +870,7 @@ class KurlyComponent extends Component {
                             이메일ok: false,
                             휴대폰: '',
                             휴대폰ok: false,
+                            isPhoneOkOpen:false,
                             주소1: '',
                             주소2: '',
                             주소: '',
@@ -773,9 +880,12 @@ class KurlyComponent extends Component {
                             생일:'',
                             생년월일: '',
                             추가입력사항: '',  //라디오버튼
+                            isAddInputBoxShow: false,
+                            addInputPlaceHolder: '',
+                            추가입력상자:'',
                             약관동의: [],     //체크박스 다중선택 저장 객체 배열
                             isAddressOn: false,  //주소검색을 클릭하면 true로 변환 그럼 주소검색창이 열린다.
-                            isAddrInputShow: false,  //주소검색을 클릭하면 true로 변환 그럼 주소검색창이 열린다.
+                            isAddressInputShow: false,  //주소검색을 클릭하면 true로 변환 그럼 주소검색창이 열린다.
                             showId: false, //아이디의 가이드텍스트 show        
                             isClassId:'',  //클래스를 '' : true : false
                             showPw: false, //비밀번호의 가이드텍스트 show   
@@ -1016,15 +1126,28 @@ class KurlyComponent extends Component {
                                     <div className="label-box">
                                         <span>추가입력 사항</span>
                                     </div>
-                                    <div className="input-box radio-box">
-                                          <label>
-                                            <input type="radio" checked={this.state.추가입력사항.includes(`추천인 아이디`)} value={`추천인 아이디`} onChange={(e) => this.onChangeChoocheon(e.target.value)} />
-                                            <span>추천인 아이디</span>
-                                          </label>
-                                          <label>
-                                            <input type="radio" checked={this.state.추가입력사항.includes(`참여 이벤트명`)} value={`참여 이벤트명`} onChange={(e) => this.onChangeChoocheon(e.target.value)} />
-                                            <span>참여 이벤트명</span>
-                                          </label>
+                                    <div className="input-box radio-box1">
+                                         <div className='radio-box2'>
+                                              <label>
+                                                <input id='id' type="radio" checked={this.state.추가입력사항.includes(`추천인 아이디`)} value={`추천인 아이디`} onChange={(e) => this.onChangeChoocheon(e.target.value, e.target.id)} />
+                                                <span>추천인 아이디</span>
+                                              </label>
+                                              <label>
+                                                <input id='event' type="radio" checked={this.state.추가입력사항.includes(`참여 이벤트명`)} value={`참여 이벤트명`} onChange={(e) => this.onChangeChoocheon(e.target.value, e.target.id)} />
+                                                <span>참여 이벤트명</span>
+                                              </label>
+                                        </div>
+                                        {
+                                            this.state.isAddInputBoxShow && (
+                                                <div className='add-input-box'>
+                                                    <input  type="text" id='addInputBox' className='inputText' placeholder={this.state.addInputPlaceHolder} value={this.state.추가입력상자} onChange={(e)=>this.onChangeAddInputBox(e.target.value)}/>
+                                                    <p>
+                                                    가입 후 7일 내 첫 주문 배송완료 시, 친구초대 이벤트 적립금이 지급됩니다. <br />
+                                                    </p>
+                                                </div>
+                                            )
+                                        }
+                                     
                                     </div>
                                 </div>
                             </li>
@@ -1127,6 +1250,6 @@ class KurlyComponent extends Component {
             </div>
         );
     }
-}
+ }
 
 export default KurlyComponent;
